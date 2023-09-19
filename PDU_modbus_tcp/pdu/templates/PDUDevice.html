@@ -1,0 +1,35 @@
+<html><head>
+    <link rel="stylesheet" href="{{ url_for('static',filename='main.CSS') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='deviceinfo.CSS') }}">
+    <title>PDU</title>
+</head>
+
+
+
+<body>
+    <div class="PDU_title">
+        <a href="{{ url_for('main') }}">主页</a>
+        <a href="{{ url_for('PDUDevice') }}">PDU设备信息</a>
+        <a href="{{ url_for('PDUBranch') }}">PDU支路信息</a>
+        <a href="{{ url_for('PDU_scoket') }}">PDU插座状态</a>
+        <a href="{{ url_for('PDUAlert') }}">报警状态</a>
+    </div>
+    <div class="info">
+        <p>PDU硬件版本：{{PDU.hardwareVer}}</p>
+        <p>PDU软件版本：{{PDU.softwareVer}}</p>
+        <p>PDU设备地址：{{PDU.deviveAdress}}</p>
+        <p>PDU波特率：{{PDU.baudRate}}</p>
+
+        <p>PDU温度：{{PDU.Temperature}}</p>
+        <P>PDU湿度：{{PDU.Humidity}}</P>
+        <P>PDU总输入互感器变比：{{PDU.transformer}}</P>
+        <P>PDU支路互感器变比：{{PDU.transformer1}}</P>
+
+        <P>PDU总电压：{{PDU.Tvoltage}}</P>
+        <P>PDU总电流：{{PDU.Tcurrent}}</P>
+        <P>PDU总功率：{{PDU.Tpower}}</P>
+        <P>PDU总电能：{{PDU.Telectrical}}</P>
+    </div>
+</body>
+
+</html>

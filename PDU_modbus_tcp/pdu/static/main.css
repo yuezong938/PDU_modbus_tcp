@@ -1,0 +1,31 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f5f5f5;
+}
+
+.PDU_title {
+    height: 41px;
+    border-top: 3px #ff8500 solid;
+    border-bottom: 1px #edeef0 solid;
+    margin-bottom: 10px;
+    background-color: #fcfcfc;
+    line-height: 38px;
+}
+
+.PDU_title a {
+    display: inline-block;
+    font-size: 12px;
+    color: #4c4c4c;
+    text-decoration: none;
+    padding: 0px 12px;
+    margin-top: 0px;
+}
+
+.PDU_title a:hover {
+    color: #FF6700;
+    background-color: #eee;
+}

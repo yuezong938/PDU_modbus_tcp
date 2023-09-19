@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static',filename='main.CSS') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='deviceinfo.CSS') }}">
+    <title>PDU</title>
+</head>
+<body>
+
+</body><body>
+    <div class="PDU_title">
+        <a href="{{ url_for('main') }}">主页</a>
+        <a href="{{ url_for('PDUDevice') }}">PDU设备信息</a>
+        <a href="{{ url_for('PDUBranch') }}">PDU支路信息</a>
+        <a href="{{ url_for('PDU_scoket') }}">PDU插座状态</a>
+        <a href="{{ url_for('PDUAlert') }}">报警状态</a>
+    </div>
+    <div class="info">
+        <P>PDU支路1电流：{{PDU.Tcurrent1}}</P>
+        <P>PDU支路1功率：{{PDU.Tpower1}}</P>
+        <P>PDU支路1电能：{{PDU.Telectrical1}}</P>
+
+        <P>PDU支路2电流：{{PDU.Tcurrent2}}</P>
+        <P>PDU支路2功率：{{PDU.Tpower2}}</P>
+        <P>PDU支路2电能：{{PDU.Telectrical2}}</P>
+
+        <P>PDU支路3电流：{{PDU.Tcurrent3}}</P>
+        <P>PDU支路3功率：{{PDU.Tpower3}}</P>
+        <P>PDU支路3电能：{{PDU.Telectrical3}}</P>
+
+        <P>PDU支路4电流：{{PDU.Tcurrent4}}</P>
+        <P>PDU支路4功率：{{PDU.Tpower4}}</P>
+        <P>PDU支路4电能：{{PDU.Telectrical4}}</P>
+
+        <P>PDU支路5电流：{{PDU.Tcurrent5}}</P>
+        <P>PDU支路5功率：{{PDU.Tpower5}}</P>
+        <P>PDU支路5电能：{{PDU.Telectrical5}}</P>
+
+        <P>PDU支路6电流：{{PDU.Tcurrent6}}</P>
+        <P>PDU支路6功率：{{PDU.Tpower6}}</P>
+        <P>PDU支路6电能：{{PDU.Telectrical6}}</P>
+
+        <P>PDU支路7电流：{{PDU.Tcurrent7}}</P>
+        <P>PDU支路7功率：{{PDU.Tpower7}}</P>
+        <P>PDU支路7电能：{{PDU.Telectrical7}}</P>
+
+        <P>PDU支路8电流：{{PDU.Tcurrent8}}</P>
+        <P>PDU支路8功率：{{PDU.Tpower8}}</P>
+        <P>PDU支路8电能：{{PDU.Telectrical8}}</P>
+    </div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f5f5f5;
+}
+
+.PDU button {
+    width: 60px;
+    height: 40px;
+    font-size: 14px;
+    color: #fff;
+    text-decoration: none;
+    line-height: 40px;
+    display: inline-block;
+    background-color: #47474c;
+}
+
+.PDU button:hover {
+    background-color: #FF6700;
+}

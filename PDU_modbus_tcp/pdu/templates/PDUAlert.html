@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static',filename='main.CSS') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='deviceinfo.CSS') }}">
+    <title>PDU</title>
+</head>
+<body>
+    <div class="PDU_title">
+        <a href="{{ url_for('main') }}">主页</a>
+        <a href="{{ url_for('PDUDevice') }}">PDU设备信息</a>
+        <a href="{{ url_for('PDUBranch') }}">PDU支路信息</a>
+        <a href="{{ url_for('PDU_scoket') }}">PDU插座状态</a>
+        <a href="{{ url_for('PDUAlert') }}">报警状态</a>
+    </div>
+    <div class="info">
+        <P>PDU温湿度报警标记：{{PDU.HTalarm}}</P>
+        <P>PDU欠压阀值：{{PDU.Undervoltage}}</P>
+        <P>PDU过压阀值：{{PDU.Overvoltage}}</P>
+        <P>PDU总过流报警阀值：{{PDU.Tovercurrent}}</P>
+        <P>PDU支路过流报警阀值：{{PDU.Boverflow}}</P>
+        <P>PDU总有功功率告警阈值：{{PDU.TPthreshold}}</P>
+        <P>PDU支路功率告警阀值：{{PDU.Bpthreshold}}</P>
+        <P>PDU温度上限：{{PDU.Utlimit}}</P>
+        <P>PDU温度下限：{{PDU.Ltlimit}}</P>
+        <P>PDU湿度上限：{{PDU.Uhlimit}}</P>
+        <P>PDU湿度下限：{{PDU.Lhlimit}}</P>
+        <P>PDU烟感传感器告警记录：{{PDU.Smoke}}</P>
+        <P>PDU水浸传感器告警记录：{{PDU.water}}</P>
+        <P>PDU防雷计数器告警记录：{{PDU.Plightning}}</P>
+        <P>PDU防雷计数器告警次数：{{PDU.Plfrequency}}</P>
+    </div>
+
+</body>
+</html>

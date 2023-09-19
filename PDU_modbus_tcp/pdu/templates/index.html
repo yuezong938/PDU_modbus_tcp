@@ -1,0 +1,19 @@
+<html>
+
+<head>
+    <title>PDU</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='main.CSS') }}">
+
+</head>
+
+<body>
+    <div class="PDU_title">
+        <a href="{{ url_for('main') }}">主页</a>
+        <a href="{{ url_for('PDUDevice') }}">PDU设备信息</a>
+        <a href="{{ url_for('PDUBranch') }}">PDU支路信息</a>
+        <a href="{{ url_for('PDU_scoket') }}">PDU插座状态</a>
+        <a href="{{ url_for('PDUAlert') }}">报警状态</a>
+    </div>
+</body>
+
+</html>
