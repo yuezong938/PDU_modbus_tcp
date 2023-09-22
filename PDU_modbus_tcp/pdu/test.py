@@ -2,33 +2,32 @@ from flask import Flask, render_template, request, redirect, url_for
 import modbus_tk.defines as pdu
 import modbus_tk.modbus_tcp as modbus_tcp
 from paho.mqtt import client as mqtt
+
 import uuid
 import json
+import time
+
+# sever = modbus_tcp.TcpMaster('192.168.1.125', 20108)
+sever = modbus_tcp.TcpMaster('192.168.1.132', 20105)
+sever.set_timeout(5.0)
+app = Flask(__name__)
 
 
-def on_connect(client, userdata, flags, rc):
-    """
-    一旦连接成功, 回调此方法
-    rc的值表示成功与否：
-        0:连接成功
-        1:连接被拒绝-协议版本不正确
-        2:连接被拒绝-客户端标识符无效
-        3:连接被拒绝-服务器不可用
-        4:连接被拒绝-用户名或密码不正确
-        5:连接被拒绝-未经授权
-        6-255:当前未使用。
-    """
-    rc_status = ["连接成功", "协议版本不正确", "客户端标识符无效", "服务器不可用", "用户名或密码不正确", "未经授权"]
-    print("connect：", rc_status[rc])
+def handle_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print('Connected successfully')
+    else:
+        print('Bad connection. Code:', rc)
+        mqtt_publish()
 
 
 def mqtt_connect():
     """连接MQTT服务器"""
     mqttClient = mqtt.Client(str(uuid.uuid4()))
-    mqttClient.on_connect = on_connect  # 返回连接状态的回调函数
-    MQTTHOST = "192.168.1.240"  # MQTT服务器地址
+    mqttClient.on_connect = handle_connect  # 返回连接状态的回调函数
+    MQTTHOST = "192.168.1.219"  # MQTT服务器地址
     MQTTPORT = 1883  # MQTT端口
-    mqttClient.username_pw_set("mqtt", "mqttsisi")  # MQTT服务器账号密码, 无密码时注释即可
+    mqttClient.username_pw_set("admin", "admin123")  # MQTT服务器账号密码, 无密码时注释即可
     mqttClient.connect(MQTTHOST, MQTTPORT, 60)
     mqttClient.loop_start()  # 启用线程连接
 
@@ -36,21 +35,19 @@ def mqtt_connect():
 
 
 def mqtt_publish():
-    """发布主题为'mqtt/demo',内容为'Demo text',服务质量为2"""
     mqttClient = mqtt_connect()
-    text = {PDU.hardwareVer, PDU.softwareVer, PDU.deviveAdress, PDU.baudRate, PDU.Temperature, PDU.Humidity,
-            PDU.transformer, PDU.transformer1, PDU.Tvoltage, PDU.Tcurrent, PDU.Tpower, PDU.Telectrical}
-    pduwr = 'text.json'
-    with open(pduwr, 'w', encoding='utf-8') as f:
-        json.dump(text, f)
-    mqttClient.publish('mqtt/demo', pduwr, 2)
-    mqttClient.loop_stop()
-
-
-# sever = modbus_tcp.TcpMaster('192.168.1.125', 20108)
-sever = modbus_tcp.TcpMaster('192.168.1.132', 20105)
-sever.set_timeout(5.0)
-app = Flask(__name__)
+    PDUDevice1()
+    text = [PDU.hardwareVer, PDU.softwareVer, PDU.deviveAdress, PDU.baudRate, PDU.Temperature, PDU.Humidity,
+            PDU.transformer, PDU.transformer1, PDU.Tvoltage, PDU.Tcurrent, PDU.Tpower, PDU.Telectrical,
+            PDU.Tcurrent1, PDU.Tpower1, PDU.Telectrical1, PDU.Tcurrent2, PDU.Tpower2, PDU.Telectrical2,
+            PDU.Tcurrent3, PDU.Tpower3, PDU.Telectrical3, PDU.Tcurrent4, PDU.Tpower4, PDU.Telectrical4,
+            PDU.Tcurrent5, PDU.Tpower5, PDU.Telectrical5, PDU.Tcurrent6, PDU.Tpower6, PDU.Telectrical6,
+            PDU.Tcurrent7, PDU.Tpower7, PDU.Telectrical7, PDU.Tcurrent8, PDU.Tpower8, PDU.Telectrical8,
+            PDU.Undervoltage, PDU.Overvoltage, PDU.Tovercurrent, PDU.Boverflow, PDU.TPthreshold,
+            PDU.Bpthreshold, PDU.Utlimit, PDU.Ltlimit, PDU.Uhlimit, PDU.Lhlimit]
+    pduwr = json.dumps(text, ensure_ascii=False)
+    mqttClient.publish('/PDU/RX', pduwr, 2)
+    mqttClient.loop_start()
 
 
 class device:
@@ -174,7 +171,8 @@ def PDU_scoket():
 @app.route('/PDUDevice')
 def PDUDevice():
     hardwareVer = int("{:0x}".format(ReadPDU(241, 0, 1)[0]))
-    PDU.hardwareVer = str(int(hardwareVer / 1000)) + "." + str(int((hardwareVer % 1000) / 100)) + "." + str(
+    PDU.hardwareVer = str(int(hardwareVer / 1000)) + "." + str(
+        int((hardwareVer % 1000) / 100)) + "." + str(
         hardwareVer % 100)
     softwareVer = int("{:0x}".format(ReadPDU(241, 1, 1)[0]))
     PDU.softwareVer = str(int(softwareVer / 1000)) + "." + str(int((softwareVer % 1000) / 100)) + "." + str(
@@ -202,6 +200,178 @@ def PDUDevice():
     PDU.Telectrical = str(int(Telectrica) / 1000) + "KWH"
 
     return render_template('PDUDevice.html', PDU=PDU)
+
+
+def PDUDevice1():
+    hardwareVer = int("{:0x}".format(ReadPDU(241, 0, 1)[0]))
+    PDU.hardwareVer = str(int(hardwareVer / 1000)) + "." + str(
+        int((hardwareVer % 1000) / 100)) + "." + str(
+        hardwareVer % 100)
+    softwareVer = int("{:0x}".format(ReadPDU(241, 1, 1)[0]))
+    PDU.softwareVer = str(int(softwareVer / 1000)) + "." + str(int((softwareVer % 1000) / 100)) + "." + str(
+        softwareVer % 100)
+    PDU.deviveAdress = "{:0x}".format(ReadPDU(241, 2, 1)[0])
+    PDU.baudRate = "{:0x}".format(ReadPDU(241, 3, 2)[0] + ReadPDU(241, 3, 2)[1])
+
+    Temperature = int("{:0x}".format(ReadPDU(241, 128, 1)[0]))
+    PDU.Temperature = str(Temperature / 100) + "\u2103"
+    Humidity = int("{:0x}".format(ReadPDU(241, 129, 1)[0]))
+    PDU.Humidity = str(Humidity / 100) + "%RH"
+    # 总输入互感器变比，支路互感器变比
+    PDU.transformer = str("{:0x}".format(ReadPDU(241, 5, 1)[0]) + ":1")
+    PDU.transformer1 = str("{:0x}".format(ReadPDU(241, 6, 1)[0]) + ":1")
+
+    # 总电压，总电流，总功率，总电能
+    Tvoltage = "{:0x}".format(ReadPDU(241, 7, 2)[0]) + "{:0x}".format(ReadPDU(241, 7, 2)[1])
+    PDU.Tvoltage = str(int(Tvoltage) / 100) + "V"
+    Tcurrent = "{:0x}".format(ReadPDU(241, 9, 2)[0]) + "{:0x}".format(ReadPDU(241, 9, 2)[1])
+    PDU.Tcurrent = str(int(Tcurrent) / 100) + "A"
+    Tpower = "{:0x}".format(ReadPDU(241, 11, 2)[0]) + "{:0x}".format(ReadPDU(241, 11, 2)[1])
+    PDU.Tpower = str(int(Tpower) / 100) + "KW"
+    Telectrica = "{:0x}".format(ReadPDU(241, 13, 3)[0]) + "{:0x}".format(ReadPDU(241, 13, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 13, 3)[2])
+    PDU.Telectrical = str(int(Telectrica) / 1000) + "KWH"
+
+    Tcurrent1 = "{:0x}".format(ReadPDU(241, 16, 2)[0]) + "{:0x}".format(ReadPDU(241, 16, 2)[1])
+    PDU.Tcurrent1 = str(int(Tcurrent1) / 1000) + "A"
+    Tpower1 = "{:0x}".format(ReadPDU(241, 18, 2)[0]) + "{:0x}".format(ReadPDU(241, 18, 2)[1])
+    PDU.Tpower1 = str(int(Tpower1[-5:]) / 10) + "W"
+    Telectrica1 = "{:0x}".format(ReadPDU(241, 20, 3)[0]) + "{:0x}".format(ReadPDU(241, 20, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 20, 3)[2])
+    PDU.Telectrical1 = str(int(Telectrica1) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路2）
+
+    Tcurrent2 = "{:0x}".format(ReadPDU(241, 23, 2)[0]) + "{:0x}".format(ReadPDU(241, 23, 2)[1])
+    PDU.Tcurrent2 = str(int(Tcurrent2) / 1000) + "A"
+    Tpower2 = "{:0x}".format(ReadPDU(241, 25, 2)[0]) + "{:0x}".format(ReadPDU(241, 25, 2)[1])
+    PDU.Tpower2 = str(int(Tpower2[-5:]) / 10) + "W"
+    Telectrica2 = "{:0x}".format(ReadPDU(241, 27, 3)[0]) + "{:0x}".format(ReadPDU(241, 27, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 27, 3)[2])
+    PDU.Telectrical2 = str(int(Telectrica2) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路3）
+
+    Tcurrent3 = "{:0x}".format(ReadPDU(241, 30, 2)[0]) + "{:0x}".format(ReadPDU(241, 30, 2)[1])
+    PDU.Tcurrent3 = str(int(Tcurrent3) / 1000) + "A"
+    Tpower3 = "{:0x}".format(ReadPDU(241, 32, 2)[0]) + "{:0x}".format(ReadPDU(241, 32, 2)[1])
+    PDU.Tpower3 = str(int(Tpower3[-5:]) / 10) + "W"
+    Telectrica3 = "{:0x}".format(ReadPDU(241, 34, 3)[0]) + "{:0x}".format(ReadPDU(241, 34, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 34, 3)[2])
+    PDU.Telectrical3 = str(int(Telectrica3) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路4）
+
+    Tcurrent4 = "{:0x}".format(ReadPDU(241, 37, 2)[0]) + "{:0x}".format(ReadPDU(241, 37, 2)[1])
+    PDU.Tcurrent4 = str(int(Tcurrent4) / 1000) + "A"
+    Tpower4 = "{:0x}".format(ReadPDU(241, 39, 2)[0]) + "{:0x}".format(ReadPDU(241, 39, 2)[1])
+    PDU.Tpower4 = str(int(Tpower4[-5:]) / 10) + "W"
+    Telectrica4 = "{:0x}".format(ReadPDU(241, 41, 3)[0]) + "{:0x}".format(ReadPDU(241, 41, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 41, 3)[2])
+    PDU.Telectrical4 = str(int(Telectrica4) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路5）
+
+    Tcurrent5 = "{:0x}".format(ReadPDU(241, 44, 2)[0]) + "{:0x}".format(ReadPDU(241, 44, 2)[1])
+    PDU.Tcurrent5 = str(int(Tcurrent5) / 1000) + "A"
+    Tpower5 = "{:0x}".format(ReadPDU(241, 46, 2)[0]) + "{:0x}".format(ReadPDU(241, 46, 2)[1])
+    PDU.Tpower5 = str(int(Tpower5[-5:]) / 10) + "W"
+    Telectrica5 = "{:0x}".format(ReadPDU(241, 48, 3)[0]) + "{:0x}".format(ReadPDU(241, 48, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 48, 3)[2])
+    PDU.Telectrical5 = str(int(Telectrica5) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路6）
+
+    Tcurrent6 = "{:0x}".format(ReadPDU(241, 51, 2)[0]) + "{:0x}".format(ReadPDU(241, 51, 2)[1])
+    PDU.Tcurrent6 = str(int(Tcurrent6) / 1000) + "A"
+    Tpower6 = "{:0x}".format(ReadPDU(241, 53, 2)[0]) + "{:0x}".format(ReadPDU(241, 53, 2)[1])
+    PDU.Tpower6 = str(int(Tpower6[-5:]) / 10) + "W"
+    Telectrica6 = "{:0x}".format(ReadPDU(241, 55, 3)[0]) + "{:0x}".format(ReadPDU(241, 55, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 55, 3)[2])
+    PDU.Telectrical6 = str(int(Telectrica6) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路7）
+
+    Tcurrent7 = "{:0x}".format(ReadPDU(241, 58, 2)[0]) + "{:0x}".format(ReadPDU(241, 58, 2)[1])
+    PDU.Tcurrent7 = str(int(Tcurrent7) / 1000) + "A"
+    Tpower7 = "{:0x}".format(ReadPDU(241, 60, 2)[0]) + "{:0x}".format(ReadPDU(241, 60, 2)[1])
+    PDU.Tpower7 = str(int(Tpower7[-5:]) / 10) + "W"
+    Telectrica7 = "{:0x}".format(ReadPDU(241, 62, 3)[0]) + "{:0x}".format(ReadPDU(241, 62, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 62, 3)[2])
+    PDU.Telectrical7 = str(int(Telectrica7) / 1000) + "KWH"
+
+    # 电流，功率，电能(支路8）
+
+    Tcurrent8 = "{:0x}".format(ReadPDU(241, 65, 2)[0]) + "{:0x}".format(ReadPDU(241, 65, 2)[1])
+    PDU.Tcurrent8 = str(int(Tcurrent8) / 1000) + "A"
+    Tpower8 = "{:0x}".format(ReadPDU(241, 67, 2)[0]) + "{:0x}".format(ReadPDU(241, 67, 2)[1])
+    PDU.Tpower8 = str(int(Tpower8[-5:]) / 10) + "W"
+    Telectrica8 = "{:0x}".format(ReadPDU(241, 69, 3)[0]) + "{:0x}".format(ReadPDU(241, 69, 3)[1]) + "{:0x}".format(
+        ReadPDU(241, 69, 3)[2])
+    PDU.Telectrical8 = str(int(Telectrica8) / 1000) + "KWH"
+
+    # 温湿度报警标记
+    HTalarm = "{:0X}".format(ReadPDU(241, 130, 1)[0])
+    HTalarm1 = int(HTalarm[:2])  # 高八位
+    HTalarm2 = int(HTalarm[-2:])  # 低八位
+    if HTalarm1 == 10:
+        if HTalarm2 == 10:
+            PDU.HTalarm = "此时温度低于下限，湿度低于下限"
+        elif HTalarm2 == 11:
+            PDU.HTalarm = "此时温度低于下限，湿度高于上限"
+    if HTalarm == 11:
+        if HTalarm2 == 10:
+            PDU.HTalarm = "此时温度高于上限，湿度低于下限"
+        if HTalarm2 == 11:
+            PDU.HTalarm = "此时温度高于上限，湿度高于上限"
+    else:
+        PDU.HTalarm = "温度湿度一切正常"
+
+    # 欠压阀值
+    Undervoltage = "{:0X}".format(ReadPDU(241, 131, 1)[0])
+    if 0 < int(Undervoltage) / 10 < 255:
+        PDU.Undervoltage = str(int(Undervoltage) / 10) + "V"
+    # 过压阀值
+    Overvoltage = "{:0X}".format(ReadPDU(241, 132, 1)[0])
+    if 0 < int(Overvoltage) / 10 < 255:
+        PDU.Overvoltage = str(int(Overvoltage) / 10) + "V"
+
+    # 总过流报警阀值
+    Tovercurrent = "{:0X}".format(ReadPDU(241, 133, 1)[0])
+    PDU.Tovercurrent = str(int(Tovercurrent) / 100) + "A"
+
+    # 支路过流报警阀值
+    Boverflow = "{:0X}".format(ReadPDU(241, 134, 1)[0])
+    PDU.Boverflow = str(int(Boverflow) / 100) + "A"
+
+    # 总有功功率告警阈值
+    TPthoreshold = "{:0X}".format(ReadPDU(241, 135, 1)[0])
+    if 0 < int(TPthoreshold) / 100 < 99.99:
+        PDU.TPthreshold = str(int(TPthoreshold) / 100) + "KW"
+
+    # 支路功率告警阀值
+    Bpthreshold = "{:0X}".format(ReadPDU(241, 136, 1)[0])
+    if 0 < int(Bpthreshold) / 100 < 99.99:
+        PDU.Bpthreshold = str(int(Bpthreshold) / 100) + "KW"
+
+    # 温度上限
+    Utlimit = "{:0X}".format(ReadPDU(241, 137, 1)[0])
+    if 0 < int(Utlimit) / 100 < 99.99:
+        PDU.Utlimit = str(int(Utlimit) / 100) + "\u2103"
+    # 温度下限
+    Ltlimit = "{:0X}".format(ReadPDU(241, 138, 1)[0])
+    if 0 < int(Ltlimit) / 100 < 99.99:
+        PDU.Ltlimit = str(int(Ltlimit) / 100) + "\u2103"
+
+    # 湿度上限
+    Uhlimit = "{:0X}".format(ReadPDU(241, 139, 1)[0])
+    if 0 < int(Uhlimit) / 100 < 99.99:
+        PDU.Uhlimit = str(int(Uhlimit) / 100) + "%Rh"
+    # 湿度下限
+    Lhlimit = "{:0X}".format(ReadPDU(241, 140, 1)[0])
+    if 0 < int(Lhlimit) / 100 < 99.99:
+        PDU.Lhlimit = str(int(Lhlimit) / 100) + "%Rh"
+    return
 
 
 @app.route('/PDUBranch')
@@ -286,6 +456,7 @@ def PDUBranch():
         ReadPDU(241, 69, 3)[2])
     PDU.Telectrical8 = str(int(Telectrica8) / 1000) + "KWH"
     return render_template('PDUBranch.html', PDU=PDU)
+
 
 ##数据写入
 # def PDUWrite():
@@ -480,7 +651,7 @@ def PDUswitch():
     return redirect(url_for('PDU_scoket'))
 
 
+mqtt_publish()
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8010, debug=True)
-    # make_request()
-    mqtt_publish()
+
